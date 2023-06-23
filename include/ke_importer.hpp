@@ -35,6 +35,10 @@ vcopies or substantial portions of the Software.
 #define u64 unsigned long long
 #pragma endregion macros
 
+#pragma region defines
+#define ke_fn(function) (reinterpret_cast<decltype(&function)>(ke_importer::detail::get_export(ke_importer::hash::get(#function))))
+#pragma endregion defines
+
 namespace ke_importer
 {
     namespace hash
@@ -101,7 +105,7 @@ namespace ke_importer
             }
         }
     #elif defined(ke_importer_kmdf)
-        extern "C" get_base();
+        extern "C" u64 get_base();
     #else
         // define ke_importer_llvm_msvc or ke_importer_kmdf
     #endif
@@ -128,9 +132,9 @@ namespace ke_importer
                     continue;
                 }
 
-                if (ke_importer::hash::get(reinterpret_cast<const char*>(ke_importer::detail::m_base + address_of_names[idx])) == function_hash)
+                if (ke_importer::hash::get(reinterpret_cast<const char*>(static_cast<const u64>(ke_importer::detail::m_base) + address_of_names[idx])) == function_hash)
                 {
-                    return reinterpret_cast<void*>(ke_importer::detail::m_base + address_of_funcs[address_of_ordinals[idx]]);
+                    return reinterpret_cast<void*>(static_cast<const u64>(ke_importer::detail::m_base) + address_of_funcs[address_of_ordinals[idx]]);
                 }
             }
 
@@ -138,9 +142,4 @@ namespace ke_importer
         }
     }
 }
-
-#pragma region defines
-#define ke_fn(function) (reinterpret_cast<decltype(&function)>(ke_importer::detail::get_export(ke_importer::hash::get(#function))))
-#pragma endregion defines
-
 #endif
